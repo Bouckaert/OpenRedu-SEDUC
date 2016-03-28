@@ -116,7 +116,37 @@
         $("#curriculum .experiences form").hide();
         $("#curriculum .educations form").hide();
         $(".explanation-sidebar .incomplete-profile .edit").hide();
+        $("#create_users").hide();
 
+        $('input:radio[name=choice]').click(function(){
+          var value = $(this).val();
+          if(value === "create_users"){
+            $("#create_users").show();
+          }else{
+            $("#create_users").hide();
+          }
+
+
+        });
+        $('#environment').change(function(){
+          var value = $(this).val();
+          var environment = { 'environment': $(this).val()  };
+          var url = "/pessoas/load/opcoes";
+
+          if(value===""){
+             $('#form_options').html(null)
+          }else{
+            $.ajax({
+            type: "POST",
+            url: url,
+            data: environment,
+            success: function(data){
+             $('#form_options').html(data)
+            }
+          });
+          }
+          
+        });
         $(document).on('change', '.experience-current', function(){
             $("#curriculum .end-date").slideToggle(150, 'swing');
         });

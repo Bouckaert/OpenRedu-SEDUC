@@ -1,0 +1,7 @@
+<%= label_tag "Selecione a turma"%>
+<%= select_tag :course, options_from_collection_for_select(@courses,'id','name')%>
+</br>
+<%= label_tag "Planilha dos alunos"%>
+<%= file_field_tag :file, accept: '.csv'%>
+</br>
+<%= submit_tag %>

@@ -1,0 +1,16 @@
+
+<%=form_tag({:controller => 'users', :action => 'load_create'}, multipart: true) do %>
+	<h2>O que você quer fazer?</h2>
+	<%= label_tag "Cadastrar escola, turma e alunos"%>
+	<%= radio_button_tag :choice,"create_all"%></br>
+	<%= label_tag "Cadastrar escola e turma"%>
+	<%= radio_button_tag :choice,"create_environment_course"%></br>
+	<%= label_tag "Cadastrar turma em uma escola existente"%>
+	<%= radio_button_tag :choice,"create_turma"%></br>
+	<%= label_tag "Cadastrar alunos em uma turma existente"%>
+	<%= radio_button_tag :choice,"create_users"%></br>
+	<div id="create_users">
+		<%= render partial: 'form_create_users'%>
+	</div>
+	
+<%end%>

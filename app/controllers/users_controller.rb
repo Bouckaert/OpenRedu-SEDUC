@@ -1,4 +1,5 @@
 # -*- encoding : utf-8 -*-
+require 'csv'
 class UsersController < BaseController
   respond_to :html, :js
 
@@ -48,7 +49,72 @@ class UsersController < BaseController
       format.html { render layout: 'new_application' }
     end
   end
+  def activate
+    redirect_to signup_path and return if params[:id].blank?
+    @user = User.find_by_activation_code(params[:id])
+    if @user and @user.activated_at
+      flash[:notice] = "Sua conta já foi ativada. Utilize seu login e senha para entrar no Redu."
+      redirect_to application_path
+      return
+    elsif @user and @user.activate
+      UserSession.create(@user) if current_user.nil?
 
+      redirect_to home_user_path(@user)
+      flash[:notice] = t :thanks_for_activating_your_account
+      return
+    end
+    flash[:error] = t(:account_activation_error)
+    redirect_to signup_path
+  end
+
+  def deactivate
+    @user.deactivate
+    self.current_user.forget_me if logged_in?
+    cookies.delete :auth_token
+    reset_sessionr
+    flash[:notice] = t :deactivate_completed
+    redirect_to login_path
+  end
+  def load_enviroments
+    flash[:info] = nil
+    @environments = User.find(current_user).environments   
+    @courses = Array.new
+
+    
+  end
+  def options
+    environment = Environment.find(params[:environment])
+    @courses = environment.courses
+    render :partial => "options" 
+  end
+  def load_create
+    if params[:choice] == "create_users"
+      add_users(params[:course])
+    end
+    #add_users(environment.courses.first)
+#  plan = Plan.from_preset("free".to_sym)
+#  plan.user = current_user
+#  
+#  escola = Environment.new()
+#  escola.courses = Array.new
+#  escola.owner = current_user
+#
+#  escola.name = "Escola X"
+#  escola.path = "escola-x"
+#  escola.initials = "ex"
+#  escola.plan = plan
+#  curso = Course.new()
+#  curso.plan = plan
+#  curso.owner = current_user
+#  curso.administrators << current_user
+#  curso.name = "Turma X"
+#  curso.path = "turma-x"
+#  curso.create_quota
+#  plan.create_invoice_and_setup
+#  curso.environment = escola
+#  escola.courses << curso
+#  escola.courses.first.owner = current_user  
+  end
   def contacts_endless
     # Replicado de users_helper#last_contacts.
     @contacts = if current_user == @user
@@ -442,5 +508,115 @@ class UsersController < BaseController
     if space_id = params[:space_id]
       @space = Space.find(space_id)
     end
+  end
+
+  def add_users(course)
+    myfile = params[:file]
+    users = Array.new
+    row = 0
+    CSV.foreach(myfile.path, headers: true) do |csv_obj|
+      row += 1
+      registration = csv_obj['Matrícula'] 
+      name = csv_obj['Nome'].partition(" ").first
+      lastname = csv_obj['Nome'].rpartition(" ").last
+      gender = csv_obj['Sexo'] 
+      birthday = csv_obj['Data de nascimento']
+      login = "m"+registration
+      password = registration
+      email = login+"@openredu.com"
+      user = User.new()
+      user.first_name = name
+      user.last_name = lastname
+      user.email = email
+      user.login = login
+      user.password = password
+      user.gender = gender
+      user.birthday = birthday
+      user.activated_at = Time.now
+      if(user.valid?)
+        users << user
+      else
+        users = nil
+        flash[:notice] = "Contem erros na linha "+row.to_s+":"
+        @environments = User.find(current_user).environments
+        render "load_enviroments"
+        break
+      end
+    end
+    if(users != nil)
+      course = Course.find(course)
+      users.each do |a|
+          if a.save
+            course.join!(a);
+          end
+
+      end
+    end
+    
+  end
+  def add_course(environment)
+    if course.save
+        if environment.plan.nil?
+          plan = Plan.from_preset("free".to_sym)
+          plan.user = environment.owner
+          course.create_quota
+          course.plan = plan
+          plan.create_invoice_and_setup
+        end
+        environment.courses << course
+    end
+  end
+  def add_environment
+    #  plan = Plan.from_preset("free".to_sym)
+#  plan.user = current_user
+#  
+#  escola = Environment.new()
+#  escola.courses = Array.new
+#  escola.owner = current_user
+#
+#  escola.name = "Escola X"
+#  escola.path = "escola-x"
+#  escola.initials = "ex"
+#  escola.plan = plan
+#  curso = Course.new()
+#  curso.plan = plan
+#  curso.owner = current_user
+#  curso.administrators << current_user
+#  curso.name = "Turma X"
+#  curso.path = "turma-x"
+#  curso.create_quota
+#  plan.create_invoice_and_setup
+#  curso.environment = escola
+#  escola.courses << curso
+#  escola.courses.first.owner = current_user  
+    plan = Plan.from_preset("free".to_sym)
+    plan.user = current_user
+    environment = Environment.new()
+    environment.courses = Array.new
+    environment.owner = current_user
+    name = params[:school]
+    path = name.split.map(&:chr).join
+    environment.name = params[:school]
+    environment.path = path
+    environment.initials = path
+    environment.plan = plan
+    course = Course.new()
+    course.owner = current_user
+    course.administrators << current_user
+    course.environment = environment
+    name_course = params[:schoolyear]
+    course.name = name_course
+    path = name_course.split.map(&:chr).join
+    course.path = path
+    if plan.valid?
+      course.plan = plan
+      course.create_quota
+      plan.create_invoice_and_setup
+    end
+    environment.courses <<  course
+    if environment.save && plan.valid?
+          
+    end
+    return environment
   end
 end

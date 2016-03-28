@@ -24,10 +24,10 @@ namespace :bootstrap do
   task :default_user => :environment do
     User.reset_callbacks(:save)
     User.reset_callbacks(:create)
-    theuser = User.new(:login => 'test_user',
-                       :email => 'test_user@example.com',
-                       :password => 'redutest123',
-                       :password_confirmation => 'redutest123',
+    theuser = User.new(:login => 'rlsma',
+                       :email => 'rlsma@example.com',
+                       :password => 'test123',
+                       :password_confirmation => 'test123',
                        :birthday => 20.years.ago,
                        :first_name => 'Test',
                        :activated_at => Time.now,
