@@ -76,7 +76,7 @@ class UsersController < BaseController
     redirect_to login_path
   end
   def load_enviroments
-    flash[:info] = nil
+    flash[:notice] = nil
     @environments = User.find(current_user).environments   
     @courses = Array.new
 
@@ -511,48 +511,71 @@ class UsersController < BaseController
   end
 
   def add_users(course)
+
     myfile = params[:file]
-    users = Array.new
-    row = 0
-    CSV.foreach(myfile.path, headers: true) do |csv_obj|
-      row += 1
-      registration = csv_obj['Matrícula'] 
-      name = csv_obj['Nome'].partition(" ").first
-      lastname = csv_obj['Nome'].rpartition(" ").last
-      gender = csv_obj['Sexo'] 
-      birthday = csv_obj['Data de nascimento']
-      login = "m"+registration
-      password = registration
-      email = login+"@openredu.com"
-      user = User.new()
-      user.first_name = name
-      user.last_name = lastname
-      user.email = email
-      user.login = login
-      user.password = password
-      user.gender = gender
-      user.birthday = birthday
-      user.activated_at = Time.now
-      if(user.valid?)
-        users << user
-      else
-        users = nil
-        flash[:notice] = "Contem erros na linha "+row.to_s+":"
+    
+    ext = File.extname(myfile.original_filename)
+    
+    if(ext == ".csv") 
+      users = Array.new
+      row = 0
+      CSV.foreach(myfile.path, headers: true) do |csv_obj|
+        row += 1
+        registration = csv_obj['Matrícula'] 
+        name = csv_obj['Nome'].partition(" ").first
+        lastname = csv_obj['Nome'].rpartition(" ").last
+        gender = csv_obj['Sexo'] 
+        birthday = csv_obj['Data de nascimento']
+        login = "m"+registration
+        password = registration
+        email = login+"@openredu.com"
+        user = User.new()
+        user.first_name = name
+        user.last_name = lastname
+        user.email = email
+        user.login = login
+        user.password = password
+        user.gender = gender
+        user.birthday = birthday
+        user.activated_at = Time.now
+        if(user.valid?)
+          users << user
+        else
+          users = nil
+          @errors_script = user.errors
+          p user.errors
+          flash[:notice] = "Contem erros na linha " +row.to_s+"(Verifique espaços antes das palavras e/ou o formata da data dd/mm/aaaa)"
+          if( (!user.errors.blank?) || (user.errors.get(:login).count == 1))
+            if(User.exists?(login: login))
+              flash[:notice] += ". Numero da matricula ja foi cadastrado"
+            end
+          end
+          @environments = User.find(current_user).environments
+          render "load_enviroments"
+          break
+        end
+      end
+      if(users != nil)
+        course = Course.find(course)
+        users.each do |a|
+            if a.save
+              a.create_settings!
+              course.join!(a);
+            end
+        end
+        if(users.count > 1)
+          flash[:notice] = "Alunos cadastrados com sucesso"
+        else
+           flash[:notice] = "Aluno cadastrado com sucesso"
+        end
         @environments = User.find(current_user).environments
         render "load_enviroments"
-        break
       end
+    else
+      flash[:notice] = "CSV inválido"
+      @environments = User.find(current_user).environments
+      render "load_enviroments"
     end
-    if(users != nil)
-      course = Course.find(course)
-      users.each do |a|
-          if a.save
-            course.join!(a);
-          end
-
-      end
-    end
-    
   end
   def add_course(environment)
     if course.save

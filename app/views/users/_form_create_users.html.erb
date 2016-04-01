@@ -1,8 +1,4 @@
 
-<%=form_tag({:controller => 'users', :action => 'load_create'}, multipart: true) do %>
-	
 	<%= label_tag "Selecione a escola"%>
 	<%= select_tag :environment, options_from_collection_for_select(@environments,'id','name'),prompt: "<selecione>"%>
 	<div id="form_options"></div>
-	
-<% end %>
