@@ -91,29 +91,6 @@ class UsersController < BaseController
     if params[:choice] == "create_users"
       add_users(params[:course])
     end
-    #add_users(environment.courses.first)
-#  plan = Plan.from_preset("free".to_sym)
-#  plan.user = current_user
-#  
-#  escola = Environment.new()
-#  escola.courses = Array.new
-#  escola.owner = current_user
-#
-#  escola.name = "Escola X"
-#  escola.path = "escola-x"
-#  escola.initials = "ex"
-#  escola.plan = plan
-#  curso = Course.new()
-#  curso.plan = plan
-#  curso.owner = current_user
-#  curso.administrators << current_user
-#  curso.name = "Turma X"
-#  curso.path = "turma-x"
-#  curso.create_quota
-#  plan.create_invoice_and_setup
-#  curso.environment = escola
-#  escola.courses << curso
-#  escola.courses.first.owner = current_user  
   end
   def contacts_endless
     # Replicado de users_helper#last_contacts.
@@ -513,16 +490,16 @@ class UsersController < BaseController
   def add_users(course)
 
     myfile = params[:file]
-    
-    ext = File.extname(myfile.original_filename)
-    
+    if(!myfile.blank?)
+      ext = File.extname(myfile.original_filename)
+    end
     if(ext == ".csv") 
       users = Array.new
       row = 0
       CSV.foreach(myfile.path, headers: true) do |csv_obj|
         row += 1
         registration = csv_obj['Matrícula'] 
-        name = csv_obj['Nome'].partition(" ").first
+        name = csv_obj['Nome'].rpartition(" ").first
         lastname = csv_obj['Nome'].rpartition(" ").last
         gender = csv_obj['Sexo'] 
         birthday = csv_obj['Data de nascimento']

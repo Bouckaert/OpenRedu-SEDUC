@@ -4,4 +4,6 @@
 <%= label_tag "Planilha dos alunos"%>
 <%= file_field_tag :file, accept: '.csv'%>
 </br>
-<%= submit_tag %>
+<%= submit_tag "Salvar", id: "submit_load", data: {disable_with:"Salvando..."}%>
+<%= image_tag 'spinner.gif', :id => 'spinner_load',
+        :style => 'display: none;'  %>

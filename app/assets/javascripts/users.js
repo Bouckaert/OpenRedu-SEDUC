@@ -118,17 +118,18 @@
         $(".explanation-sidebar .incomplete-profile .edit").hide();
         $("#create_users").hide();
 
-        $('input:radio[name=choice]').click(function(){
+        $(document).on('click', 'input:radio[name=choice]',function(){
           var value = $(this).val();
           if(value === "create_users"){
             $("#create_users").show();
           }else{
             $("#create_users").hide();
           }
-
-
         });
-        $('#environment').change(function(){
+        $(document).on('click', '#submit_load',function(){
+          $("#spinner_load").css('display', 'inline-block');
+        });
+        $(document).on('change', '#environment',function(){
           var value = $(this).val();
           var environment = { 'environment': $(this).val()  };
           var url = "/pessoas/load/opcoes";
