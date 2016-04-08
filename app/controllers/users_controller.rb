@@ -488,7 +488,6 @@ class UsersController < BaseController
   end
 
   def add_users(course)
-
     myfile = params[:file]
     if(!myfile.blank?)
       ext = File.extname(myfile.original_filename)
@@ -496,9 +495,15 @@ class UsersController < BaseController
     if(ext == ".csv") 
       users = Array.new
       row = 0
-      CSV.foreach(myfile.path, headers: true) do |csv_obj|
+      p myfile
+      begin
+        csv = CSV.read(myfile.tempfile, encoding: 'utf-8',headers: true)
+      rescue ArgumentError
+        csv = CSV.read(myfile.tempfile, encoding: 'iso-8859-1:utf-8',headers: true, col_sep: ";")
+      end
+     csv.each do |csv_obj|
         row += 1
-        registration = csv_obj['Matrícula'] 
+        registration = csv_obj['Matrícula']
         name = csv_obj['Nome'].rpartition(" ").first
         lastname = csv_obj['Nome'].rpartition(" ").last
         gender = csv_obj['Sexo'] 
@@ -531,7 +536,8 @@ class UsersController < BaseController
           render "load_enviroments"
           break
         end
-      end
+        
+    end
       if(users != nil)
         course = Course.find(course)
         users.each do |a|
