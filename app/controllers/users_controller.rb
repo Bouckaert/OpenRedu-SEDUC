@@ -504,7 +504,7 @@ class UsersController < BaseController
      csv.each do |csv_obj|
         row += 1
         registration = csv_obj['Matrícula']
-        name = csv_obj['Nome'].rpartition(" ").first
+        name = csv_obj['Nome'].partition(" ").first
         lastname = csv_obj['Nome'].rpartition(" ").last
         gender = csv_obj['Sexo'] 
         birthday = csv_obj['Data de nascimento']
@@ -538,13 +538,14 @@ class UsersController < BaseController
         end
         
     end
+
       if(users != nil)
         course = Course.find(course)
+        User.import users
+        allusers = User.all
         users.each do |a|
-            if a.save
-              a.create_settings!
-              course.join!(a);
-            end
+          index = allusers.find_index { |w| w.login == a.login}
+          course.join!(allusers[index])
         end
         if(users.count > 1)
           flash[:notice] = "Alunos cadastrados com sucesso"
