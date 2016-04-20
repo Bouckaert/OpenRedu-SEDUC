@@ -77,7 +77,7 @@ class UsersController < BaseController
   end
   def load_enviroments
     flash[:notice] = nil
-    @environments = User.find(current_user).environments   
+    @environments = Environment.all   
     @courses = Array.new
 
     
@@ -544,8 +544,12 @@ class UsersController < BaseController
         User.import users
         allusers = User.all
         users.each do |a|
-          index = allusers.find_index { |w| w.login == a.login}
-          course.join!(allusers[index])
+          allusers.each do |b|
+            if(a.login == b.login)
+              course.join!(b)
+              break
+            end
+          end
         end
         if(users.count > 1)
           flash[:notice] = "Alunos cadastrados com sucesso"
