@@ -27,8 +27,8 @@ Redu::Application.configure do
   config.action_dispatch.best_standards_support = :builtin
 
   # Nome e URL do app
-  config.url = "0.0.0.0:3000"
-  config.representer.default_url_options = {:host => "127.0.0.1:3000"}
+  config.url = "ead.openredu.com"
+  config.representer.default_url_options = {:host => "ead.openredu.com"}
 
   config.action_mailer.default_url_options = { :host => config.url }
   config.action_mailer.asset_host = "http://#{config.url}"
