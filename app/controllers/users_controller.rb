@@ -566,6 +566,7 @@ class UsersController < BaseController
       render "load_enviroments"
     end
   end
+  
   def add_course(environment)
     if course.save
         if environment.plan.nil?
