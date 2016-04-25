@@ -546,6 +546,7 @@ class UsersController < BaseController
         users.each do |a|
           allusers.each do |b|
             if(a.login == b.login)
+              b.create_settings!
               course.join!(b)
               break
             end
