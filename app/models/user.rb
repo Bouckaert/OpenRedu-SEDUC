@@ -157,7 +157,7 @@ class User < ActiveRecord::Base
   # VALIDATIONS
   validates_presence_of :first_name, :last_name
   validates :birthday, allow_nil: true,
-            date: { before: Proc.new { 13.years.ago } }
+            date: { before: Proc.new { 10.years.ago } }
   validates_acceptance_of :tos
   validates_format_of :mobile,
                       with: /^\+\d{2}\s\(\d{2}\)\s\d{4}-\d{4}$/,

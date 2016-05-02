@@ -488,6 +488,7 @@ class UsersController < BaseController
   end
 
   def add_users(course)
+    course = Course.find(course)
     myfile = params[:file]
     if(!myfile.blank?)
       ext = File.extname(myfile.original_filename)
@@ -495,7 +496,6 @@ class UsersController < BaseController
     if(ext == ".csv") 
       users = Array.new
       row = 0
-      p myfile
       begin
         csv = CSV.read(myfile.tempfile, encoding: 'utf-8',headers: true)
       rescue ArgumentError
@@ -523,32 +523,36 @@ class UsersController < BaseController
         if(user.valid?)
           users << user
         else
-          users = nil
-          @errors_script = user.errors
-          p user.errors
-          flash[:notice] = "Contem erros na linha " +row.to_s+"(Verifique espaços antes das palavras e/ou o formata da data dd/mm/aaaa)"
-          if( (!user.errors.blank?) || (user.errors.get(:login).count == 1))
-            if(User.exists?(login: login))
-              flash[:notice] += ". Numero da matricula ja foi cadastrado"
-            end
+          userExists = User.find_by_login(user.login)
+          if(!userExists.blank?)
+            course.join!(userExists)
+          else
+            users = nil
+            @errors_script = user.errors
+            flash[:notice] = "Contem erros na linha " +row.to_s+"(Verifique espaços antes das palavras e/ou o formata da data dd/mm/aaaa)"
+            #Verifica se o usuario ja foi cadastrado
+            #if( (!user.errors.blank?) || (user.errors.get(:login).count == 1))
+            #  if(User.exists?(login: login))
+            #    flash[:notice] += ". Numero da matricula ja foi cadastrado"
+            #  end
+            #end
+            @environments = Environment.all
+            render "load_enviroments"
+            break
           end
-          @environments = User.find(current_user).environments
-          render "load_enviroments"
-          break
         end
         
     end
 
       if(users != nil)
-        course = Course.find(course)
         User.import users
         allusers = User.all
         users.each do |a|
           allusers.each do |b|
             if(a.login == b.login)
-              b.create_settings!
-              course.join!(b)
-              break
+             b.create_settings!
+             course.join!(b)
+             break
             end
           end
         end
@@ -557,16 +561,16 @@ class UsersController < BaseController
         else
            flash[:notice] = "Aluno cadastrado com sucesso"
         end
-        @environments = User.find(current_user).environments
+        @environments = Environment.all
         render "load_enviroments"
       end
     else
       flash[:notice] = "CSV inválido"
-      @environments = User.find(current_user).environments
+      @environments = Environment.all
       render "load_enviroments"
     end
   end
-  
+
   def add_course(environment)
     if course.save
         if environment.plan.nil?
@@ -632,4 +636,7 @@ class UsersController < BaseController
     end
     return environment
   end
+
+  private
+
 end
