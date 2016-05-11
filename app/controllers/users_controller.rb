@@ -574,6 +574,7 @@ class UsersController < BaseController
   end
   def add_users_teachers(environment)
       myfile = params[:file]
+      environments = Environment.find(environment)
     if(!myfile.blank?)
       ext = File.extname(myfile.original_filename)
     end
@@ -581,60 +582,64 @@ class UsersController < BaseController
       users = Array.new
       row = 0
       begin
-        csv = CSV.read(myfile.tempfile, encoding: 'utf-8', headers: true,col_sep: ";")
+        csv = CSV.read(myfile.tempfile, encoding: 'utf-8', headers: true, col_sep: ";")
       rescue ArgumentError
         csv = CSV.read(myfile.tempfile, encoding: 'iso-8859-1:utf-8',headers: true, col_sep: ";")
       end
-      courses = Course.all
+      p csv
+      courses = environments.courses
       csv.each do |csv_obj|
-        p csv_obj
-        all_names = csv_obj['Nome'].split(" ")
-        name = all_names[1]
-        last_name = all_names.last
-        email = csv_obj['E-MAIL']
-        login = "m"+csv_obj['RF']
-        password = csv_obj['RF']
-        user = User.new()
-        user = User.find_by_login_or_email(login)
-        course_name = csv_obj['TURMAS']
-        course = nil
-        if(user.blank?)
-          #criar novo usuario e cadastrar turma
+        if(!csv_obj['Nome'].blank? && !csv_obj['RF'].blank? && !csv_obj['E-MAIL'].blank? && !csv_obj['TURMAS'].blank?)
+          csv_obj['Nome'].blank?
+          all_names = csv_obj['Nome'].split(" ")
+          name = all_names[1]
+          last_name = all_names.last
+          email = csv_obj['E-MAIL']
+          login = "m"+csv_obj['RF']
+          password = csv_obj['RF']
           user = User.new()
-          user.first_name = name
-          user.last_name = last_name
-          user.email = email
-          user.login = login
-          user.password = password
-          user.activated_at = Time.now
-          if user.save
-            user.create_settings!
-            courses.each do |c| 
-              if(c.name == course_name)
-                course = c
-                break;
+          user = User.find_by_login_or_email(login)
+          course_name = csv_obj['TURMAS']
+          course_name = course_name.tr('-','')
+          course = nil
+          if(user.blank?)
+            #criar novo usuario e cadastrar turma
+            user = User.new()
+            user.first_name = name
+            user.last_name = last_name
+            user.email = email
+            user.login = login
+            user.password = password
+            user.activated_at = Time.now
+            if user.save
+              user.create_settings!
+              courses.each do |c| 
+                if(c.name == course_name)
+                  course = c
+                  break;
+                end
               end
-            end
-            if !course.blank?
-              course.join!(user,Role[:teacher])
+              if !course.blank?
+                course.join!(user,Role[:teacher])
+              else
+                flash[:notice] = "Turma não existe"
+              end
             else
-              flash[:notice] = "Turma não existe"
-            end
+              flash[:notice] = "Não foi cadastrado com sucesso"
+            end       
           else
-            flash[:notice] = "Não foi cadastrado com sucesso"
-          end       
-        else
-            courses.each do |c| 
-              if(c.name == course_name)
-                course = c
-                break;
+              courses.each do |c| 
+                if(c.name == course_name)
+                  course = c
+                  break;
+                end
               end
-            end
-            if !course.blank?
-              course.join!(user,Role[:teacher])
-            else
-              flash[:notice] = "Turma não existe"
-            end
+              if !course.blank?
+                course.join!(user,Role[:teacher])
+              else
+                flash[:notice] = "Turma não existe"
+              end
+          end
         end
       end
     else
