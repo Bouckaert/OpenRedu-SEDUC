@@ -90,6 +90,8 @@ class UsersController < BaseController
   def load_create
     if params[:choice] == "create_users"
       add_users(params[:course])
+    elsif params[:choice] == "create_users_teachers"
+      add_users_teachers(params[:environment])
     end
   end
   def contacts_endless
@@ -570,7 +572,77 @@ class UsersController < BaseController
       render "load_enviroments"
     end
   end
-
+  def add_users_teachers(environment)
+      myfile = params[:file]
+    if(!myfile.blank?)
+      ext = File.extname(myfile.original_filename)
+    end
+    if(ext == ".csv") 
+      users = Array.new
+      row = 0
+      begin
+        csv = CSV.read(myfile.tempfile, encoding: 'utf-8', headers: true,col_sep: ";")
+      rescue ArgumentError
+        csv = CSV.read(myfile.tempfile, encoding: 'iso-8859-1:utf-8',headers: true, col_sep: ";")
+      end
+      courses = Course.all
+      csv.each do |csv_obj|
+        p csv_obj
+        all_names = csv_obj['Nome'].split(" ")
+        name = all_names[1]
+        last_name = all_names.last
+        email = csv_obj['E-MAIL']
+        login = "m"+csv_obj['RF']
+        password = csv_obj['RF']
+        user = User.new()
+        user = User.find_by_login_or_email(login)
+        course_name = csv_obj['TURMAS']
+        course = nil
+        if(user.blank?)
+          #criar novo usuario e cadastrar turma
+          user = User.new()
+          user.first_name = name
+          user.last_name = last_name
+          user.email = email
+          user.login = login
+          user.password = password
+          user.activated_at = Time.now
+          if user.save
+            user.create_settings!
+            courses.each do |c| 
+              if(c.name == course_name)
+                course = c
+                break;
+              end
+            end
+            if !course.blank?
+              course.join!(user,Role[:teacher])
+            else
+              flash[:notice] = "Turma não existe"
+            end
+          else
+            flash[:notice] = "Não foi cadastrado com sucesso"
+          end       
+        else
+            courses.each do |c| 
+              if(c.name == course_name)
+                course = c
+                break;
+              end
+            end
+            if !course.blank?
+              course.join!(user,Role[:teacher])
+            else
+              flash[:notice] = "Turma não existe"
+            end
+        end
+      end
+    else
+      flash[:notice] = "CSV invalido"
+    end
+    @environments = Environment.all
+    render "load_enviroments"
+  end
   def add_course(environment)
     if course.save
         if environment.plan.nil?
@@ -584,28 +656,7 @@ class UsersController < BaseController
     end
   end
   def add_environment
-    #  plan = Plan.from_preset("free".to_sym)
-#  plan.user = current_user
-#  
-#  escola = Environment.new()
-#  escola.courses = Array.new
-#  escola.owner = current_user
-#
-#  escola.name = "Escola X"
-#  escola.path = "escola-x"
-#  escola.initials = "ex"
-#  escola.plan = plan
-#  curso = Course.new()
-#  curso.plan = plan
-#  curso.owner = current_user
-#  curso.administrators << current_user
-#  curso.name = "Turma X"
-#  curso.path = "turma-x"
-#  curso.create_quota
-#  plan.create_invoice_and_setup
-#  curso.environment = escola
-#  escola.courses << curso
-#  escola.courses.first.owner = current_user  
+     
     plan = Plan.from_preset("free".to_sym)
     plan.user = current_user
     environment = Environment.new()

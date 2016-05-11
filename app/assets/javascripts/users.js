@@ -106,24 +106,23 @@
       }
     };
 
-
-    jQuery(function(){
-        $(".experience-current:checked").refreshEndDateVisibility();
-        refreshDefaultFormsVisibility();
-        removeTitle();
-        $("#biography").refreshSocialNetwork();
-        // Esconde os forms de edição
-        $("#curriculum .experiences form").hide();
-        $("#curriculum .educations form").hide();
-        $(".explanation-sidebar .incomplete-profile .edit").hide();
-        $("#create_users").hide();
-
-        $(document).on('click', 'input:radio[name=choice]',function(){
+    $(document).on('click', 'input:radio[name=choice]',function(){
+          $('#form_options').hide();
           var value = $(this).val();
+          $('#form_script')[0].reset();
+          $(this).val(value);
+          $(this).attr('checked', true);
+          
           if(value === "create_users"){
             $("#create_users").show();
+            $("#create_users_teachers").hide();
+           
+          }else if (value === "create_users_teachers"){
+            $("#create_users_teachers").show();
+            $("#create_users").hide();
           }else{
             $("#create_users").hide();
+            $("#create_users_teachers").hide();
           }
         });
         $(document).on('click', '#submit_load',function(){
@@ -143,11 +142,26 @@
             data: environment,
             success: function(data){
              $('#form_options').html(data)
+             $('#form_options').show();
             }
           });
           }
           
         });
+
+    jQuery(function(){
+        $(".experience-current:checked").refreshEndDateVisibility();
+        refreshDefaultFormsVisibility();
+        removeTitle();
+        $("#biography").refreshSocialNetwork();
+        // Esconde os forms de edição
+        $("#curriculum .experiences form").hide();
+        $("#curriculum .educations form").hide();
+        $(".explanation-sidebar .incomplete-profile .edit").hide();
+        $("#create_users").hide();
+        $("#create_users_teachers").hide();
+
+
         $(document).on('change', '.experience-current', function(){
             $("#curriculum .end-date").slideToggle(150, 'swing');
         });
