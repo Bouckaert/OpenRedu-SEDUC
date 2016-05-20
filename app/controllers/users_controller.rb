@@ -590,7 +590,6 @@ class UsersController < BaseController
       courses = environments.courses
       csv.each do |csv_obj|
         if(!csv_obj['Nome'].blank? && !csv_obj['RF'].blank? && !csv_obj['E-MAIL'].blank? && !csv_obj['TURMAS'].blank?)
-          csv_obj['Nome'].blank?
           all_names = csv_obj['Nome'].split(" ")
           name = all_names[1]
           last_name = all_names.last

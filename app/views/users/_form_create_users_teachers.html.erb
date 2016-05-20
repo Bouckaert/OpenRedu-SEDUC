@@ -2,7 +2,7 @@
 	<%= label_tag "Selecione a escola"%>
 	<%= select_tag :environment, options_from_collection_for_select(@environments,'id','name'),prompt: "<selecione>"%>
 	</br>
-	<%= label_tag "Planilha dos alunos"%>
+	<%= label_tag "Planilha dos professores"%>
 	<%= file_field_tag :file, accept: '.csv'%>
 	</br>
 	<%= submit_tag "Salvar", id: "submit_load", data: {disable_with:"Salvando..."}%>
