@@ -3,14 +3,17 @@
 	<h2>O que você quer fazer?</h2>
 	<%= label_tag "Cadastrar escola, turma e alunos"%>
 	<%= radio_button_tag :choice,"create_all"%></br>
-	<%= label_tag "Cadastrar escola e turma"%>
-	<%= radio_button_tag :choice,"create_environment_course"%></br>
+	<%= label_tag "Cadastrar turma modelo"%>
+	<%= radio_button_tag :choice,"create_model_class"%></br>
 	<%= label_tag "Cadastrar professores"%>
 	<%= radio_button_tag :choice,"create_users_teachers"%></br>
 	<%= label_tag "Cadastrar alunos em uma turma existente"%>
 	<%= radio_button_tag :choice,"create_users"%></br>
 	<div id="create_users">
 		<%= render partial: 'form_create_users'%>
+	</div>
+	<div id="create_model_class">
+		<%= render partial: 'form_create_model_class'%>
 	</div>
 	<div id="create_users_teachers">
 		<%= render partial: 'form_create_users_teachers'%>

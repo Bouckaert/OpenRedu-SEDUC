@@ -92,7 +92,16 @@ class UsersController < BaseController
       add_users(params[:course])
     elsif params[:choice] == "create_users_teachers"
       add_users_teachers(params[:environment])
+    elsif params[:choice] == "create_model_class"
+      if(params[:type] == '9')
+        p "entrou aqui 9"
+        add_model_class(3, params[:course])
+      elsif(params[:type] == '3')
+        p "entrou aqui 3"
+      end
     end
+    @environments = Environment.all
+    render "load_enviroments"
   end
   def contacts_endless
     # Replicado de users_helper#last_contacts.
@@ -538,8 +547,7 @@ class UsersController < BaseController
             #    flash[:notice] += ". Numero da matricula ja foi cadastrado"
             #  end
             #end
-            @environments = Environment.all
-            render "load_enviroments"
+            
             break
           end
         end
@@ -563,13 +571,13 @@ class UsersController < BaseController
         else
            flash[:notice] = "Aluno cadastrado com sucesso"
         end
-        @environments = Environment.all
-        render "load_enviroments"
+        #@environments = Environment.all
+        #render "load_enviroments"
       end
     else
       flash[:notice] = "CSV inválido"
-      @environments = Environment.all
-      render "load_enviroments"
+      #@environments = Environment.all
+      #render "load_enviroments"
     end
   end
   def add_users_teachers(environment)
@@ -644,8 +652,39 @@ class UsersController < BaseController
     else
       flash[:notice] = "CSV invalido"
     end
-    @environments = Environment.all
-    render "load_enviroments"
+    #@environments = Environment.all
+    #render "load_enviroments"
+  end
+  def add_model_class(course_model,course)
+    course_model = Course.find(course_model)
+    course = Course.find(course)
+    new_spaces = Array.new
+    course_model.spaces.each do |space_model|
+      space = Space.new
+      space.name = space_model.name
+      space.description = space_model.description
+      space.course = course
+      space.owner = course.owner
+      if space.valid?
+        space.save
+        new_spaces << space
+        space_model.subjects.each do |subject_model|
+         subject = Subject.new
+         subject.name = subject_model.name
+         subject.description = subject_model.description
+         subject.owner = space.owner
+         subject.space = space
+         subject.finalized = 1;
+         if subject.valid?
+           subject.save
+           subject_model.lectures.each do |lecture|
+            lecture.clone_for_subject!(subject)
+           end
+         end
+        end
+      end
+    end
+
   end
   def add_course(environment)
     if course.save

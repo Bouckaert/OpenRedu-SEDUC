@@ -92,6 +92,27 @@
       }
     };
 
+    $(document).on('change', '#environment_model_class',function(){
+          var value = $(this).val();
+          var environment = { 'environment': $(this).val()  };
+          var url = "/pessoas/load/opcoes";
+
+          if(value===""){
+             $('#form_options2').html(null)
+          }else{
+            $.ajax({
+            type: "POST",
+            url: url,
+            data: environment,
+            success: function(data){
+             $('#form_options2').html(data)
+             $('#form_options2').show();
+            }
+          });
+          }
+          
+    });
+
     // Mostra os campos corretos no formulário de Ensino Superior
     $.fn.refreshShowCorrectFields = function() {
       var $this = $(this);
@@ -108,6 +129,7 @@
 
     $(document).on('click', 'input:radio[name=choice]',function(){
           $('#form_options').hide();
+          $('#form_options2').hide();
           var value = $(this).val();
           $('#form_script')[0].reset();
           $(this).val(value);
@@ -116,14 +138,22 @@
           if(value === "create_users"){
             $("#create_users").show();
             $("#create_users_teachers").hide();
+            $("#create_model_class").hide();
            
           }else if (value === "create_users_teachers"){
             $("#create_users_teachers").show();
             $("#create_users").hide();
+            $("#create_model_class").hide();
+          }else if (value === "create_model_class"){
+            $("#create_model_class").show();
+            $("#create_users").hide();
+            $("#create_users_teachers").hide();
           }else{
+            $("#create_model_class").hide();
             $("#create_users").hide();
             $("#create_users_teachers").hide();
           }
+
         });
         $(document).on('click', '#submit_load',function(){
           $("#spinner_load").css('display', 'inline-block');
@@ -148,6 +178,7 @@
           }
           
         });
+         
 
     jQuery(function(){
         $(".experience-current:checked").refreshEndDateVisibility();
@@ -160,6 +191,7 @@
         $(".explanation-sidebar .incomplete-profile .edit").hide();
         $("#create_users").hide();
         $("#create_users_teachers").hide();
+        $('#create_model_class').hide();
 
 
         $(document).on('change', '.experience-current', function(){

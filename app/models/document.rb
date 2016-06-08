@@ -30,7 +30,7 @@ class Document < ActiveRecord::Base
   def upload_to_scribd
     super if persisted?
   end
-
+  
   def scribd_url
     if self.ipaper_document
       self.display_ipaper.slice(/src=\"\S+\"/).slice(/http\S+/).split(/\"/)[0]

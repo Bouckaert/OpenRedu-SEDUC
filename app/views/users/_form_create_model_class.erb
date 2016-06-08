@@ -1,0 +1,7 @@
+	<%= label_tag "Selecione a escola"%>
+	<%= select_tag :environment, options_from_collection_for_select(@environments,'id','name'), id: "environment_model_class",prompt: "<selecione>"%>
+	</br>
+	<%= label_tag "Tipo da turma"%>
+	<%= select_tag "type", "<option value='9'>9º ano</option><option value='3'>3º ano</option>".html_safe %>
+	</br>
+	<div id="form_options2"></div>

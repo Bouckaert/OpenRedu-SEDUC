@@ -186,6 +186,12 @@ class LecturesController < BaseController
   # DELETE /lectures/1
   # DELETE /lectures/1.xml
   def destroy
+
+    if(@lecture.lectureable.is_a?(Document) && @lecture.is_clone)
+       @document = @lecture.lectureable
+       @document.ipaper_id = 0
+       @document.ipaper_access_key = 0
+    end
     @lecture.destroy
     @lecture.subject.space.course.quota.try(:refresh!)
     @lecture.subject.space.course.environment.quota.try(:refresh!)
@@ -193,8 +199,7 @@ class LecturesController < BaseController
 
     @quota = @course.quota || @course.environment.quota
     @plan = @course.plan || @course.environment.plan
-
-   respond_with(@space, @subject, @lecture) do |format|
+    respond_with(@space, @subject, @lecture) do |format|
      format.js { render "lectures/admin/destroy" }
       format.html do
         flash[:notice] = "A aula foi removida."
