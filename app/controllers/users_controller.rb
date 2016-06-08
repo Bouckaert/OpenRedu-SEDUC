@@ -95,7 +95,6 @@ class UsersController < BaseController
     elsif params[:choice] == "create_model_class"
       if(params[:type] == '9')
         p "entrou aqui 9"
-        add_model_class(3, params[:course])
       elsif(params[:type] == '3')
         p "entrou aqui 3"
       end
@@ -655,6 +654,7 @@ class UsersController < BaseController
     #@environments = Environment.all
     #render "load_enviroments"
   end
+  #primeiro argumento é o id da turma que vai ser copia e o segundo é para onde vai ser copiada
   def add_model_class(course_model,course)
     course_model = Course.find(course_model)
     course = Course.find(course)
