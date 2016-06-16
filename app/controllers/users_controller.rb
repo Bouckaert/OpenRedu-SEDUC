@@ -464,6 +464,20 @@ class UsersController < BaseController
     redirect_to application_path(:anchor => "modal-sign-up")
   end
 
+  def load_all_classes
+    course_model9 = 599;
+    for i in 10..107
+      if(i!=70)
+        environment = Environment.find(i);
+        environment.courses.each do |course|
+          if(course.name.include?("9"))
+            add_model_class(course_model9, course)
+          end
+        end
+      end   
+    end
+  end
+
   protected
 
   def deny_access(exception)
@@ -677,6 +691,7 @@ class UsersController < BaseController
          subject.finalized = 1;
          if subject.valid?
            subject.save
+           subject.members = subject.space.users
            subject_model.lectures.each do |lecture|
             lecture.clone_for_subject!(subject)
            end
