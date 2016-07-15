@@ -76,9 +76,14 @@ class UsersController < BaseController
     redirect_to login_path
   end
   def load_enviroments
-    flash[:notice] = nil
-    @environments = Environment.all   
-    @courses = Array.new
+    if(current_user.admin?)
+      flash[:notice] = nil
+      @environments = Environment.all   
+      @courses = Array.new
+    else
+      redirect_to home_path
+    end
+      
 
     
   end
@@ -551,17 +556,8 @@ class UsersController < BaseController
           if(!userExists.blank?)
             course.join!(userExists)
           else
-            users = nil
             @errors_script = user.errors
             flash[:notice] = "Contem erros na linha " +row.to_s+"(Verifique espaços antes das palavras e/ou o formata da data dd/mm/aaaa)"
-            #Verifica se o usuario ja foi cadastrado
-            #if( (!user.errors.blank?) || (user.errors.get(:login).count == 1))
-            #  if(User.exists?(login: login))
-            #    flash[:notice] += ". Numero da matricula ja foi cadastrado"
-            #  end
-            #end
-            
-            break
           end
         end
         

@@ -27,9 +27,9 @@ Redu::Application.routes.draw do
     post "presence/send_chat_message"
     get "presence/last_messages_with"
     get "vis/dashboard/teacher_participation_interaction"
-    #post 'users/load/options' => 'users#options'
-    #get 'users/load' => 'users#load_enviroments'
-    #post 'users/load' => 'users#load_create'
+    post 'users/load/options' => 'users#options'
+    get 'users/load' => 'users#load_enviroments'
+    post 'users/load' => 'users#load_create'
     match '/jobs/notify' => 'jobs#notify', :as => :notify
     resources :statuses, :only => [:show, :create, :destroy] do
       member do
